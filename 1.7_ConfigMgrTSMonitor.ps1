@@ -362,7 +362,8 @@ Function Get-TaskSequenceData
                 inner join v_R_System sys on tes.ResourceID = sys.ResourceID
                 inner join v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
                 where tsp.Name = '$TS'
-                and DATEDIFF(hour,ExecutionTime,GETDATE()) < $TimePeriod
+                --and DATEDIFF(hour,ExecutionTime,GETDATE()) < $TimePeriod
+				and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
                 --and Name0 like '$SQLComputerName'
 				--and ActionName like '$SQLActionName'
                 and ExitCode not in ($ExitCode)
@@ -518,7 +519,8 @@ Function Get-TaskSequenceData
                 INNER JOIN v_RA_System_MACAddresses mac on tes.ResourceID = mac.ResourceID
                 INNER JOIN v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
                 where tsp.Name = '$TS'
-                and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+                --and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+				and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
                 --and sys.Name0 like '$SQLComputerName'
 				--and ActionName like '$SQLActionName'
                 and sys.SMBIOS_GUID0 = '$MyGUID'
@@ -533,7 +535,8 @@ Function Get-TaskSequenceData
                 inner join v_RA_System_MACAddresses mac on tes.ResourceID = mac.ResourceID
                 inner join v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
                 where tsp.Name = '$TS'
-                and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+                --and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+				and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
                 --and Name0 like '$SQLComputerName'
 				--and ActionName like '$SQLActionName'
                 and sys.SMBIOS_GUID0 = '$MyGUID'
@@ -584,7 +587,8 @@ Function Get-TaskSequenceData
                 INNER JOIN v_RA_System_MACAddresses mac on tes.ResourceID = mac.ResourceID
                 INNER JOIN v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
                 where tsp.Name = '$TS'
-                and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+                --and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+				and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
                 and sys.Name0 like '$SQLComputerName'
 				and ActionName like '$SQLActionName'
                 and ExitCode not in ($ExitCode)
@@ -598,7 +602,8 @@ Function Get-TaskSequenceData
                 inner join v_RA_System_MACAddresses mac on tes.ResourceID = mac.ResourceID
                 inner join v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
                 where tsp.Name = '$TS'
-                and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+                --and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+				and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
                 and Name0 like '$SQLComputerName'
 				and ActionName like '$SQLActionName'
                 and ExitCode not in ($SuccessCode)) as t
@@ -833,7 +838,8 @@ Function Populate-ComputerNames
             inner join v_R_System sys on tes.ResourceID = sys.ResourceID
             inner join v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
             where tsp.Name = '$TS'
-            and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+            --and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+			and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
             --and Name0 like '$SQLComputerName'
             and ExitCode not in ($ExitCode)
 			and tes.LastStatusMsgID not in ($DisabledStep)
@@ -1011,7 +1017,8 @@ Function Populate-ActionNames
             --inner join v_R_System sys on tes.ResourceID = sys.ResourceID
             inner join v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
             where tsp.Name = '$TS'
-            and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+            --and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
+			and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
             --and Name0 like '$SQLComputerName'
             and ExitCode not in ($ExitCode)
 			and tes.LastStatusMsgID not in ($DisabledStep)
