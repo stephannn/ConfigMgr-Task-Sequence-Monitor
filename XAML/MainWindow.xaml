@@ -68,11 +68,15 @@
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition Width="auto" />
                             <ColumnDefinition Width="auto" />
+							<ColumnDefinition Width="auto" />
+                            <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" Content="Action Name:" HorizontalAlignment="Left" Margin="0,7,0,0" VerticalAlignment="Top" Width="96"/>
                         <ComboBox Grid.Column="1" x:Name="ActionName" HorizontalAlignment="Left" Margin="0,7,0,0" VerticalAlignment="Top" Width="356" Height="26"/>
                         <Label Grid.Column="2" Content="ComputerName:" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top"/>
                         <ComboBox Grid.Column="3" x:Name="ComputerName" HorizontalAlignment="Left" Margin="0,7,0,0" VerticalAlignment="Top" Width="160" Height="26" IsEditable="True"/>
+						<Label Grid.Column="4" Content="Build Versions:" HorizontalAlignment="Left" Margin="0,8,0,0" VerticalAlignment="Top"/>
+						<TextBox Grid.Column="5" x:Name="BuildExt" HorizontalAlignment="Left" Height="26" Margin="0,8,0,0" VerticalAlignment="Top" Width="220" VerticalContentAlignment="Center" IsReadOnly="True"/>
                     </Grid>
                 </Grid>
             </StackPanel>
