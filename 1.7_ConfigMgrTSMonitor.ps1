@@ -64,6 +64,13 @@ if (Test-Path -Path "$currentLocation\MahApps.Metro.dll")
 # GUI
 [xml]$xaml = Get-Content ($currentLocation + "\XAML\MainWindow.xaml")
 
+$BuildExtVersionSql = @()
+Import-Csv -Path ($currentLocation + "\BuildExt.csv") -Delimiter ";" -Header Build, Version | ForEach-Object {
+    $BuildExtVersionSql += "WHEN sys.BuildExt like '$($_.Build)' THEN '$($_.Version)'"
+
+}
+
+
 $hash = [hashtable]::Synchronized(@{})
 $reader = (New-Object -TypeName System.Xml.XmlNodeReader -ArgumentList $xaml)
 $hash.Window = [Windows.Markup.XamlReader]::Load( $reader )
@@ -76,6 +83,7 @@ $hash.ErrorsOnly = $hash.Window.FindName('ErrorsOnly')
 $hash.SuccessCode = $hash.Window.FindName('SuccessCode')
 $hash.DisabledSteps = $hash.Window.FindName('DisabledSteps')
 $hash.ComputerName = $hash.Window.FindName('ComputerName')
+$hash.BuildExt = $hash.Window.FindName('BuildExt')
 $hash.ActionName = $hash.Window.FindName('ActionName')
 $hash.RefreshPeriod = $hash.Window.FindName('RefreshPeriod')
 $hash.RefreshNow = $hash.Window.FindName('RefreshNow')
@@ -276,7 +284,7 @@ Function Get-TaskSequenceData
 
     $code = 
     {
-        param($hash,$SQLServer,$Database,$TimePeriod,$SuccessCode,$ErrorsOnly,$DisabledSteps,$ComputerName,$ActionName,$TS,$MDTIntegrated,$URL,$DTFormat)
+        param($hash,$SQLServer,$Database,$BuildExtVersionSql,$TimePeriod,$SuccessCode,$ErrorsOnly,$DisabledSteps,$ComputerName,$ActionName,$TS,$MDTIntegrated,$URL,$DTFormat)
 
         # Notify of data retrieval         
         $hash.Window.Dispatcher.Invoke(
@@ -490,11 +498,7 @@ Function Get-TaskSequenceData
 					END as [Connection Type], 
 				CAST(
 					 CASE
-						  WHEN sys.BuildExt like '10.0.19044.%' THEN '21H2'
-						  WHEN sys.BuildExt like '10.0.19042.%' THEN '20H2'
-						  WHEN sys.BuildExt like '10.0.18363.%' THEN '1909'
-						  WHEN sys.BuildExt like '10.0.18362.%' THEN '1903'
-						  WHEN sys.BuildExt like '10.0.17134.%' THEN '1803'
+						  $($BuildExtVersionSql -join "`n")
 						  ELSE sys.BuildExt
 					 END AS char) as BuildExt, 
 				comp.Model0,
@@ -558,11 +562,7 @@ Function Get-TaskSequenceData
 					END as [Connection Type], 
 				CAST(
 					 CASE
-						  WHEN sys.BuildExt like '10.0.19044.%' THEN '21H2'
-						  WHEN sys.BuildExt like '10.0.19042.%' THEN '20H2'
-						  WHEN sys.BuildExt like '10.0.18363.%' THEN '1909'
-						  WHEN sys.BuildExt like '10.0.18362.%' THEN '1903'
-						  WHEN sys.BuildExt like '10.0.17134.%' THEN '1803'
+						  $($BuildExtVersionSql -join "`n")
 						  ELSE sys.BuildExt
 					 END AS char) as BuildExt, 
 				comp.Model0,
@@ -762,7 +762,7 @@ Function Get-TaskSequenceData
     $DTFormat = $hash.DTFormat.SelectedItem
 
     # Create PS instance in runspace pool and execute
-    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($ComputerName).AddArgument($ActionName).AddArgument($TS).AddArgument($MDTIntegrated).AddArgument($URL).AddArgument($DTFormat)
+    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($BuildExtVersionSql).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($ComputerName).AddArgument($ActionName).AddArgument($TS).AddArgument($MDTIntegrated).AddArgument($URL).AddArgument($DTFormat)
 
     $PSInstances += $PSinstance
     $PSinstance.RunspacePool = $RunspacePool
@@ -803,7 +803,7 @@ Function Populate-ComputerNames
 
     $code = 
     {
-        param($hash,$SQLServer,$Database,$TimePeriod,$SuccessCode,$ErrorsOnly,$DisabledSteps,$TS,$MDTIntegrated,$URL)
+        param($hash,$SQLServer,$Database,$BuildExtVersionSql,$TimePeriod,$SuccessCode,$ErrorsOnly,$DisabledSteps,$TS,$MDTIntegrated,$URL)
         
         # Set variable values
         if ($ErrorsOnly -eq 'True')
@@ -833,7 +833,12 @@ Function Populate-ComputerNames
         # Run SQL query
         $Query = "
             Select Distinct Name0,
-            SMBIOS_GUID0 as 'GUID'
+            SMBIOS_GUID0 as 'GUID',
+			CAST(
+				CASE
+				  $($BuildExtVersionSql -join "`n")
+				  ELSE sys.BuildExt
+				END AS char) as BuildExt
             from vSMS_TaskSequenceExecutionStatus tes
             inner join v_R_System sys on tes.ResourceID = sys.ResourceID
             inner join v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
@@ -859,6 +864,7 @@ Function Populate-ComputerNames
             $obj = New-Object -TypeName psobject
             Add-Member -InputObject $obj -MemberType NoteProperty -Name 'ComputerName' -Value $Row.Name0
             Add-Member -InputObject $obj -MemberType NoteProperty -Name 'GUID' -Value $Row.GUID
+			Add-Member -InputObject $obj -MemberType NoteProperty -Name 'BuildExt' -Value $Row.BuildExt
             $PCResults += $obj
         }
         
@@ -940,14 +946,19 @@ Function Populate-ComputerNames
             $FinalComputerNameList = @()
             $FinalComputerNameList += $ConfigMgrList.ComputerName
             $FinalComputerNameList += $AdditionalComputerNames
+			
+			$BuildVersions = [String]::Join('; ', (($PCResults | Select-Object -Property BuildExt).BuildExt | Group-Object | Sort-Object Count -Descending | ForEach-Object {$_ | select * } ))
+			
         }  
         
         # Add a wildcard option and add only ConfigMgr results if MDT not enabled
         if ($MDTIntegrated -eq $false)
         {
             $FinalComputerNameList = @()
-            $PCResults = $PCResults | Select-Object -ExpandProperty ComputerName
-            $FinalComputerNameList += $PCResults
+            #$PCResults = $PCResults | Select-Object -ExpandProperty ComputerName
+            $FinalComputerNameList += $PCResults | Select-Object -ExpandProperty ComputerName
+			$BuildVersions = [String]::Join('; ', @($PCResults | Select-Object -Property BuildExt | Group-Object BuildExt | Sort-Object Count -Descending | ForEach-Object {  "$($_.Name.Trim()) = $($_.Count)" }) )
+		
         }
         $FinalComputerNameList += '-All-'
          
@@ -956,6 +967,7 @@ Function Populate-ComputerNames
         $hash.Window.Dispatcher.Invoke(
             [action]{
                 $hash.ComputerName.ItemsSource = [Array]$FinalComputerNameList
+				$hash.BuildExt.Text = $BuildVersions
         })
     }
 
@@ -971,7 +983,7 @@ Function Populate-ComputerNames
     $URL = $hash.MDTURL.Text
 
     # Create PS instance in runspace pool and execute
-    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($TS).AddArgument($MDTIntegrated).AddArgument($URL)
+    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($BuildExtVersionSql).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($TS).AddArgument($MDTIntegrated).AddArgument($URL)
     $PSInstances += $PSinstance
     $PSinstance.RunspacePool = $RunspacePool
     $PSinstance.BeginInvoke()
@@ -1064,7 +1076,7 @@ Function Populate-ActionNames
     $TS = $hash.TaskSequence.SelectedItem
 
     # Create PS instance in runspace pool and execute
-    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($TS)
+    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($BuildExtVersionSql).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($TS)
     $PSInstances += $PSinstance
     $PSinstance.RunspacePool = $RunspacePool
     $PSinstance.BeginInvoke()
