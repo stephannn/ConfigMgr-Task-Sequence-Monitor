@@ -58,10 +58,10 @@
                                 <Run FontFamily="Calibri" FontSize="13" Text="Documentation can be found on my blog:" />
                                 <Hyperlink x:Name="Link1" NavigateUri="http://smsagent.wordpress.com/tools/configmgr-task-sequence-monitor/">smsagent.wordpress.com</Hyperlink>
                                 <LineBreak />
-                                <Run FontFamily="Calibri" FontSize="13" Text="by Trevor Jones" />
+                                <Run FontFamily="Calibri" FontSize="13" Text="originally by Trevor Jones, enhanced by Stephan" />
                             </Paragraph>
                             <Paragraph>
-                                <Run FontFamily="Calibri" FontSize="13" Text="Version 1.6" />
+                                <Run FontFamily="Calibri" FontSize="13" Text="Version 1.7" />
                             </Paragraph>
                         </FlowDocument>
                     </RichTextBox>
