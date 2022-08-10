@@ -1076,7 +1076,7 @@ Function Populate-ActionNames
     $TS = $hash.TaskSequence.SelectedItem
 
     # Create PS instance in runspace pool and execute
-    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($BuildExtVersionSql).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($TS)
+    $PSinstance = [powershell]::Create().AddScript($code).AddArgument($hash).AddArgument($SQLServer).AddArgument($Database).AddArgument($TimePeriod).AddArgument($SuccessCode).AddArgument($ErrorsOnly).AddArgument($DisabledSteps).AddArgument($TS)
     $PSInstances += $PSinstance
     $PSinstance.RunspacePool = $RunspacePool
     $PSinstance.BeginInvoke()
