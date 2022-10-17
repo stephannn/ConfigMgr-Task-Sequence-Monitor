@@ -518,8 +518,8 @@ Function Get-TaskSequenceData
 				   GROUP BY Name, MachineID, CNIsOnInternet, ClientVersion, LastPolicyRequest, LastDDR,
 				   LastHardwareScan, CNLastOnlinetime) cmcbs ON cmcbs.MachineID = sys.ResourceID
 				--INNER JOIN v_CollectionMemberClientBaselineStatus cmcbs ON cmcbs.MachineID = sys.ResourceID
-				INNER JOIN v_GS_COMPUTER_SYSTEM comp ON comp.ResourceID = sys.ResourceID
-				INNER JOIN v_GS_PC_BIOS BIOS ON BIOS.ResourceID = sys.ResourceID
+				LEFT JOIN v_GS_COMPUTER_SYSTEM comp ON comp.ResourceID = sys.ResourceID
+				LEFT JOIN v_GS_PC_BIOS BIOS ON BIOS.ResourceID = sys.ResourceID
                 INNER JOIN v_RA_System_MACAddresses mac on tes.ResourceID = mac.ResourceID
                 INNER JOIN v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
                 where tsp.Name = '$TS'
@@ -582,8 +582,8 @@ Function Get-TaskSequenceData
 				   GROUP BY Name, MachineID, CNIsOnInternet, ClientVersion, LastPolicyRequest, LastDDR,
 				   LastHardwareScan, CNLastOnlinetime) cmcbs ON cmcbs.MachineID = sys.ResourceID
 				--INNER JOIN v_CollectionMemberClientBaselineStatus cmcbs ON cmcbs.MachineID = sys.ResourceID
-				INNER JOIN v_GS_COMPUTER_SYSTEM comp ON comp.ResourceID = sys.ResourceID
-				INNER JOIN v_GS_PC_BIOS BIOS ON BIOS.ResourceID = sys.ResourceID
+				LEFT JOIN v_GS_COMPUTER_SYSTEM comp ON comp.ResourceID = sys.ResourceID
+				LEFT JOIN v_GS_PC_BIOS BIOS ON BIOS.ResourceID = sys.ResourceID
                 INNER JOIN v_RA_System_MACAddresses mac on tes.ResourceID = mac.ResourceID
                 INNER JOIN v_TaskSequencePackage tsp on tes.PackageID = tsp.PackageID
                 where tsp.Name = '$TS'
