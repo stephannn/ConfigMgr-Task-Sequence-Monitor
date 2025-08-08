@@ -607,9 +607,7 @@ Function Get-TaskSequenceData
 
 			$Query = "$baseQuery $specificCondition ORDER BY ExecutionTime Desc"
 			
-			
-			
-            $baseQuery = "
+            $ErrQuery = "
                 Select Count(Name0) as 'Count' from (Select DISTINCT (Name0), ActionName, ExecutionTime 
                 from vSMS_TaskSequenceExecutionStatus tes
                 inner join v_R_System sys on tes.ResourceID = sys.ResourceID
@@ -619,10 +617,9 @@ Function Get-TaskSequenceData
                 --and DATEDIFF(hour,ExecutionTime,GETDATE()) <= $TimePeriod
 				and DATEDIFF(hour,(CONVERT(datetime, SWITCHOFFSET(CONVERT(datetimeoffset, ExecutionTime), DATENAME(TzOffset, SYSDATETIMEOFFSET()))) ),GETDATE()) <= $TimePeriod
 				and ActionName like '$SQLActionName'
-                and ExitCode not in ($SuccessCode)) as t
+                and ExitCode not in ($SuccessCode) $specificCondition) as t
             "
 			
-			$ErrQuery = "$baseQuery $specificCondition"
         }
         $command = $connection.CreateCommand()
         $command.CommandText = $Query
